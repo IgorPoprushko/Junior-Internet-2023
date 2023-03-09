@@ -12,10 +12,10 @@ class _ChooseState extends State<Choose> {
       body: SafeArea(
         child: Center(
           child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 10,
             direction: Axis.vertical,
             children: [
-              SizedBox(height: 50),
               ElevatedButton.icon(
                 onPressed: () {
                   Navigator.pushNamed(context, "/login");

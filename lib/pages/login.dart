@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:junior_internet_2023/utils/getData.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -7,9 +9,16 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  @override
+  initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: Form(
         key: _formKey,
         child: Padding(
@@ -25,7 +34,9 @@ class _LoginState extends State<Login> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      print("Login!"); // backend
+                      Server(url: "http://worldtimeapi.org/api/timezone/Europe/London")
+                          .getData();
+                      Navigator.pushReplacementNamed(context, "/tasks");
                     }
                   },
                   child: Text("Login"),
