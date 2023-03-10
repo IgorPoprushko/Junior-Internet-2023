@@ -40,8 +40,12 @@ app.use("/api/*", function (req, res, next) {
 
 // Login args(login, password, family_id)
 app.post(config.routes.login, async (req, res) => {
+  if(req.session.logined == true){
+    res.sendStatus(200).send({ message: "Success!" });
+    return;
+  }
   let data = req.fields;
-  
+
   // validation*
 
   pool.query(`SELECT family_id, id, role FROM user WHERE login = "${data["login"]}" AND password = "${data["password"]}" AND family_id = ${data["family_id"]};`, 
