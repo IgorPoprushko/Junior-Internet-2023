@@ -20,5 +20,14 @@ module.exports = {
       0: "kid",
       1: "parent"
     }
-  }
+  },
+  routes:{
+    login: "/api/login",
+    logout: "/api/logout",
+    register: "/api/register",
+    create_task: "/api/create_task",
+    create_user: "/api/create_user",
+    add_expense: "/api/add_expense",
+
+  },
 };

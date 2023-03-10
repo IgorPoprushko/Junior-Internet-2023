@@ -13,12 +13,12 @@ var transporter = nodemailer.createTransport({
   }
 });
 
-module.exports.SendEmail = async function(email) {
+module.exports.SendEmail = async function(email, id) {
     var mailOptions = {
         from: 'Abobka',
         to: email,
-        subject: 'Thanks for registration !',
-        html: '<a href="https://www.youtube.com/watch?v=ZK1pNGmNBEc">*Button*</a>'
+        subject: 'Confirm your registration',
+        html: `<h3>Your family id is </h3><h2>${id}</h2><h3>.</h3>`
       };
     transporter.sendMail(mailOptions, function(error, info){
         if (error) {

@@ -20,140 +20,157 @@ const app = express();
 app.use(formidable());
 app.use(cookieParser());
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
-app.use(
-  session({
-    secret: "14.1",
-  })
-);
-//#endregion
+app.use(session({secret: "14.1",}));
+app.use("/api/*", function (req, res, next) {
+  var uid = req.originalUrl;
 
-// Login
-app.post("/api/login", async (req, res) => {
-  let data = req.fields;
-
-  // validation*
-
-  try{
-    pool.query(`SELECT family_id, id, role FROM user WHERE login = "${data["login"]}" AND password = "${data["password"]}" AND family_id = ${data["family_id"]};`, 
-      function(err, results) {
-        console.log("results:",results); 
-        console.log("error:",err);
-        if(err == null && results.length == 1){
-          req.session.userFamilyId = results[0]["family_id"];
-          req.session.userId = results[0]["id"];
-          req.session.userRole = results[0]["role"];
-          res.sendStatus(200);
-        }else{
-          res.sendStatus(400);
-        }
-    });
-  }catch(e){
-    console.log(e);
-    res.sendStatus(400);
+  if(uid == config.routes.login || uid == config.routes.register){
+    next();
+    return;
+  }
+  if (!req.session.logined == true) {
+    res.status(403).send({ message: "No token provided!" });
+    return;
+  } else {
+    next();
   }
 });
 
-// Logout
-app.post("/api/logout", async (req, res) => {
-  req.session.destroy((error)=>{res.send((error == undefined)? 200:400)});
-});
+//#endregion
 
-// Registration                     In Progress 
-app.post("/api/register", async (req, res) => {
+// Login args(login, password, family_id)
+app.post(config.routes.login, async (req, res) => {
   let data = req.fields;
   
   // validation*
 
-  let code = Math.floor(1000 + Math.random() * 9000);
-  try {
+  pool.query(`SELECT family_id, id, role FROM user WHERE login = "${data["login"]}" AND password = "${data["password"]}" AND family_id = ${data["family_id"]};`, 
+    function(err, results) {
+      // console.log("results:",results); 
+      if(err == null && results.length == 1){
+        //#region Configure Session
+        req.session.logined = true;
+        req.session.userFamilyId = results[0]["family_id"];
+        req.session.userId = results[0]["id"];
+        req.session.userRole = results[0]["role"];
+        //#endregion
+        res.sendStatus(200).send({ message: "Success!" });
+      }else{
+        console.log("error:",err);
+        res.sendStatus(400).send({ message: "Wrong login,password or family code" });
+      }
+  });
+});
+
+// Logout args()
+app.post(config.routes.login, async (req, res) => {
+  req.session.destroy((error)=>{res.send((error == undefined)? 200:400).send({ message: (error == undefined)? "Success!":"Oops!" });});
+});
+
+// Registration args(email, first_name, last_name, login, password)
+app.post(config.routes.register, async (req, res) => {
+  let data = req.fields;
+  
+  // validation*
+
+  //let code = Math.floor(1000 + Math.random() * 9000);
+  pool.query(`INSERT INTO family ( name ,email ) VALUES ( "" ,"${data["email"]}" );`, 
+    function(err, results) {
+      // console.log("results:",results); 
+      if(err == undefined){
+        pool.query(`INSERT INTO USER ( name, surname, login, password, role, family_id, balance)
+          VALUES ("${data["first_name"]}", "${data["last_name"]}", "${data["login"]}", "${data["password"]}", ("parent"), ${results["insertId"]}, NULL );`, 
+          function(err, results2) {
+            // console.log("results:",results2); 
+            if(err == undefined){
+              EmailSender.SendEmail(data["email"],results["insertId"]);
+              res.sendStatus(200).send({ message: "Success!" });
+              return;
+            }else{
+              console.log("error:",err);
+              res.sendStatus(400).send({ message: "Oops2!" });
+              return;
+            }
+        });
+
+      }else{
+        console.log("error:",err);
+        res.sendStatus(400).send({ message: "Oops1!" });
+        return;
+      }
+  });
+
+});
+
+// Create Task args(task_title, task_desc, task_reward, task_start_date, task_end_date, task_children_list)
+app.post(config.routes.create_task, async (req, res) => {
+  if (req.session.userRole == config.data.ParentRole){
+    let data = req.fields;
+
+    // validation*
+
+    pool.query(`INSERT INTO task_list( family_id, title, description, reward, start_date, end_date, children_task_list, user_id, created_at ) 
+    VALUES ( ${req.session.userFamilyId}, "${data["task_title"]}", "${data["task_desc"]}", ${data["task_reward"]}, "${data["task_start_date"]}", "${data["task_end_date"]}", "${data["task_children_list"]}", ${req.session.userId}, NOW() );`, 
+      function(err, results) {
+        // console.log("results:",results); 
+        if(err == null){
+          res.sendStatus(200).send({ message: "Success!" });
+        }else{
+          console.log("error:",err);
+          res.sendStatus(400).send({ message: "Oops!" });
+        }
+    });
+
+  }else{
+    res.sendStatus(400);
+  }
+});
+
+// Create User args(first_name, last_name, login, password)
+app.post(config.routes.create_user, async (req, res) => {
+  if (req.session.userRole == config.data.ParentRole){
+    let data = req.fields;
+
+    // validation*
+
+    pool.query(`INSERT INTO USER ( name, surname, login, password, role, family_id, balance)
+      VALUES ("${data["first_name"]}", "${data["last_name"]}", "${data["login"]}", "${data["password"]}", ("${(data["role"]==0) ? config.data.ChildRole:config.data.ParentRole}"), ${results.session.userFamilyId}, 0 );`, 
+      function(err, results) {
+        // console.log("results:",results); 
+        if(err == undefined){
+          res.sendStatus(200).send({ message: "Success!" });
+        }else{
+          console.log("error:",err);
+          res.sendStatus(400).send({ message: "Oops!" });
+        }
+    });
     
-      pool.query(`INSERT INTO family ( name ,email ) VALUES ( '' ,'${data["email"]}' );`, 
-        function(err, results) {
-          console.log("results:",results); 
-          console.log("error:",err);
-          if(err == undefined){
-
-            pool.query(`INSERT INTO USER ( name, surname, login, password, role, family_id, balance)
-              VALUES ('${data["first_name"]}', '${data["last_name"]}', '${data["login"]}', '${data["password"]}', ('parent'), ${results[0]["insertId"]}, NULL );`, 
-              function(err, results) {
-                console.log("results:",results); 
-                console.log("error:",err);
-                if(err == undefined){
-                  
-                }else{
-                  res.sendStatus(400);
-                  return;
-                }
-            });
-
-          }else{
-            res.sendStatus(400);
-            return;
-          }
-      });
-    await EmailSender.SendEmail(data["email"]);
-
-  } catch (ex) {
-    console.log(ex);
-    res.sendStatus(400);
-    return;
-  }
-  res.sendStatus(200);
-});
-
-// Create Task
-app.post("/api/create_task", async (req, res) => {
-  if (req.session.userRole == config.data.ParentRole){
-    let data = req.fields;
-
-    // validation*
-
-    try{
-      pool.query(`INSERT INTO task_list( family_id, title, description, reward, start_date, end_date, children_task_list, user_id, created_at ) VALUES ( ${req.session.userFamilyId}, '${data["task_title"]}', '${data["task_desc"]}', ${data["task_reward"]}, ${data["task_start_date"]}, ${data["task_end_date"]}, '${data["task_children_list"]}', ${req.session.userId}, NOW() );`, 
-        function(err, results) {
-          console.log("results:",results); 
-          console.log("error:",err);
-          if(err == null){
-            res.sendStatus(200);
-          }else{
-            res.sendStatus(400);
-          }
-      });
-    }catch(e){
-      console.log(e);
-      res.sendStatus(400);
-    }
   }else{
     res.sendStatus(400);
   }
 });
-// Create User
-app.post("/api/create_user", async (req, res) => {
-  if (req.session.userRole == config.data.ParentRole){
+
+// Add Expense args(expense_category, expense_amount)
+app.post(config.routes.add_expense, async (req, res) => {
+  if (req.session.userRole == config.data.ChildRole){
     let data = req.fields;
 
     // validation*
 
-    try{
-      pool.query(`INSERT INTO USER ( name, surname, login, password, role, family_id, balance)
-        VALUES ('${data["first_name"]}', '${data["last_name"]}', '${data["login"]}', '${data["password"]}', ('${(data["role"]==0) ? config.data.ChildRole:config.data.ParentRole}'), ${results.session.userFamilyId}, 0 );`, 
-        function(err, results) {
-          console.log("results:",results); 
+    pool.query(`INSERT INTO expenses ( child_id, category, amount, created_at )
+      VALUES ("${results.session.userId}", "${data["expense_category"]}", "${data["expense_amount"]}", NOW() );`, 
+      function(err, results) {
+        // console.log("results:",results); 
+        if(err == undefined){
+          // ChangeBalance                      !!!!
+          res.sendStatus(200).send({ message: "Success!" });
+        }else{
           console.log("error:",err);
-          if(err == undefined){
-            
-          }else{
-            res.sendStatus(400);
-            return;
-          }
-      });
-    }catch(e){
-      console.log(e);
-      res.sendStatus(400);
-    }
+          res.sendStatus(400).send({ message: "Oops!" });
+        }
+    });
   }else{
-    res.sendStatus(400);
+    res.sendStatus(400).send({ message: "You are not a parent." });
   }
 });
 
