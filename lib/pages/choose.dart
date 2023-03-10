@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:junior_internet_2023/utils/getData.dart';
 
 class Choose extends StatefulWidget {
   @override
@@ -6,6 +7,11 @@ class Choose extends StatefulWidget {
 }
 
 class _ChooseState extends State<Choose> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

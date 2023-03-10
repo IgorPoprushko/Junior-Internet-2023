@@ -12,11 +12,20 @@ class _LoginState extends State<Login> {
 
   @override
   initState() {
+    Future<Map<String, String?>?> getsel = Session.getStringsSF(["session"]);
+
+    getsel.then((value) => {print(value.toString())});
     super.initState();
   }
 
+  //Server server = Server(url: "http://127.0.0.1:81/api");
+
   @override
   Widget build(BuildContext context) {
+    TextEditingController code = TextEditingController();
+    TextEditingController login = TextEditingController();
+    TextEditingController password = TextEditingController();
+
     return Scaffold(
       appBar: AppBar(),
       body: Form(
@@ -26,17 +35,32 @@ class _LoginState extends State<Login> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              FormInput("Family Code:"),
-              FormInput("Login:"),
-              FormInput("Password:"),
+              FormInput("Family Code:", code),
+              FormInput("Login:", login),
+              FormInput("Password:", password),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 10),
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      Server(url: "http://worldtimeapi.org/api/timezone/Europe/London")
-                          .getData();
-                      Navigator.pushReplacementNamed(context, "/tasks");
+                      Future<int> status =
+                          Session.post("http://127.0.0.1:81/api/login", {
+                        "login": login.text,
+                        "password": password.text,
+                        "family_id": code.text,
+                      });
+
+                      status.then((int value) {
+                        if (value == 200) {
+                          if (value == 200) {
+                            Session.addStringsToSF(
+                                {"session": Session.headers["cookie"]});
+                            Navigator.pushReplacementNamed(context, "/tasks");
+                          } else {
+                            print("fuck ${value}");
+                          }
+                        }
+                      }).catchError((e) => print(e));
                     }
                   },
                   child: Text("Login"),
@@ -49,8 +73,9 @@ class _LoginState extends State<Login> {
     );
   }
 
-  TextFormField FormInput(String text) {
+  TextFormField FormInput(String text, var inputController) {
     return TextFormField(
+      controller: inputController,
       decoration: InputDecoration(hintText: text),
       validator: (String? value) {
         if (value == null || value.isEmpty) {

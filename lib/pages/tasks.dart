@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:junior_internet_2023/utils/getData.dart';
 
 class Tasks extends StatefulWidget {
   @override
@@ -15,6 +16,8 @@ class _TasksState extends State<Tasks> {
     {"title": "Clean the dishes4"},
     {"title": "Clean the dishes5"},
   ];
+
+  //Server server = Server(url: "http://127.0.0.1:81/api");
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +36,34 @@ class _TasksState extends State<Tasks> {
       itemBuilder: (context, index) {
         return Card(
           child: ListTile(
-            onTap: () {},
+            onTap: () {
+              // Future<int> status = server.postData("create_task", {
+              //   "task_title": "1",
+              //   "task_desc": "2",
+              //   "task_reward": "10",
+              //   "task_start_date": "1000-01-01",
+              //   "task_end_date": "1000-01-01",
+              //   "task_children_list": "[]",
+              // });
+
+              // status
+              //     .then((int value) => {print(value)})
+              //     .catchError((e) => {print(e)});
+
+              Future<int> status =
+                  Session.post("http://127.0.0.1:81/api/create_task", {
+                "task_title": "1",
+                "task_desc": "2",
+                "task_reward": "10",
+                "task_start_date": "1000-01-01",
+                "task_end_date": "1000-01-01",
+                "task_children_list": "[]",
+              });
+
+              status
+                  .then((int value) => {print(value)})
+                  .catchError((e) => {print(e)});
+            },
             title: Text(data[index]["title"]),
             leading: Icon(Icons.access_alarm),
             trailing: Icon(Icons.expand_more),
