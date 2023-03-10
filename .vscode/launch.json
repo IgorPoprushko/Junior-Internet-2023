@@ -1,0 +1,24 @@
+{
+	"version": "0.1.0",
+	"configurations": [
+		{
+			"type": "node",
+			"name": "Backend",
+			"request": "launch",
+			"program": "${workspaceRoot}/bin/backend.js",
+			"cwd": "${workspaceRoot}",
+			"args": [
+				"DEBUG"
+			],
+			"envFile": "${workspaceFolder}/debug.env",
+			"env": {},
+			"outFiles": [
+				"${workspaceRoot}/bin/**/*.js"
+			],
+			"smartStep": true,
+			"skipFiles": [
+				"<node_internals>/**"
+			]
+		}
+	]
+}

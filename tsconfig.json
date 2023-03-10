@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"rootDir": "src",
+		"module": "CommonJS",
+		"target": "ES2021",
+		"noImplicitAny": true,
+		"noImplicitThis": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"esModuleInterop": true,
+		"removeComments": true,
+		"preserveConstEnums": true,
+		"experimentalDecorators": true,
+		"sourceMap": true,
+		"outDir": "./bin"
+	},
+	"include": [
+		"./src/**/*"
+	]
+}
