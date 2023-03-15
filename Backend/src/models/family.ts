@@ -5,7 +5,7 @@ export class Family {
 	readonly name: string;
 	readonly email: string;
 
-	static async getByEmail(pool: MyPool, email: string): Promise<Family> {
+	static async get_by_email(pool: MyPool, email: string): Promise<Family> {
 
 		const result = await pool.query("SELECT * FROM FAMILY WHERE email = ?;", [email]);
 		if (result[0].length !== 1)

@@ -25,7 +25,7 @@ export function registerRouter(pool: MyPool): Router {
 		if (!body.email || !body.login || !body.password || !body.firstName || !body.lastName)
 			throw new DomainError(`Invalid value(s)`);
 
-		const existing = await Family.getByEmail(pool, body.email);
+		const existing = await Family.get_by_email(pool, body.email);
 		if (!!existing)
 			throw new DomainError(`Email taken.`);
 

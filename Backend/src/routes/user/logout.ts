@@ -1,7 +1,6 @@
 //#region Inports {#309,3}
 import express, { Router } from "express";
 import expressAsyncHandler from "express-async-handler";
-import { DomainError } from "../../common/errors";
 //#endregion
 
 export function logoutRouter(): Router {

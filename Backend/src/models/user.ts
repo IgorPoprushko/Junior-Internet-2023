@@ -23,14 +23,13 @@ export class User {
 			.toString("hex");
 	}
 
-	static async get_by_login_family(pool: MyPool, login: String, family_id: String): Promise<User> {
-
+	static async get_by_login_and_family(pool: MyPool, login: String, family_id: String): Promise<User> {
 		const result = await pool.query("SELECT * FROM USER WHERE login = ? AND family_id = ?;", [login, family_id]);
 		if (result[0].length !== 1)
 			return undefined;
 		return User.materialize(result[0][0]);
 	}
-	static async get_by_id_family(pool: MyPool, user_id: String, family_id: String): Promise<User> {
+	static async get_by_id_and_family_id(pool: MyPool, user_id: String, family_id: String): Promise<User> {
 
 		const result = await pool.query("SELECT * FROM USER WHERE id = ? AND family_id = ?;", [user_id, family_id]);
 		if (result[0].length !== 1)
@@ -43,6 +42,23 @@ export class User {
 		if (result[0].length !== 1)
 			return false;
 		return child_list.length == Number(result[0][0]["Count"]);
+	}
+	static async get_all_by_family_id(pool: MyPool, family_id: String, user_id: string): Promise<User[]> {
+
+		const q_result = await pool.query("SELECT * FROM USER WHERE family_id = ? AND id != ? AND archive = 0;", [family_id, user_id]);
+		if (q_result[0].length == 0)
+			return undefined;
+
+		let result = q_result[0].map((user) => User.materialize(user))
+
+		return result;
+	}
+	static async get_balance_by_id(pool: MyPool, user_id: string): Promise<number> {
+
+		const q_result = await pool.query("SELECT balance FROM USER WHERE id = ? AND archive = 0;", [user_id]);
+		if (q_result[0].length == 0)
+			return undefined;
+		return Number(q_result[0][0]["balance"]);
 	}
 
 	static async create(pool: MyPool, user: User): Promise<User> {

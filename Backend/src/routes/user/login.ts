@@ -27,7 +27,7 @@ export function loginRouter(pool: MyPool): Router {
 		if (!body.family_id || !body.login || !body.password)
 			throw new DomainError(`Invalid value for login/password or family code`);
 
-		const user = await User.get_by_login_family(pool, body.login, body.family_id);
+		const user = await User.get_by_login_and_family(pool, body.login, body.family_id);
 		if (!user || user.password !== body.password)
 			throw new DomainError(`Invalid login/password or family code.`);
 		//#endregion

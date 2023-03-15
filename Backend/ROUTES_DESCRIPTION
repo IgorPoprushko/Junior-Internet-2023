@@ -1,0 +1,80 @@
+export const routes = {
+	"all_routes_plus_desc": [
+		"/user/expenses/all/:child_id", // get all users expenses
+		"/user/tasks/assign/all/:child_id", // get all assigned tasks
+		"/user/profile/image/", // put profile img                            (not implemented) 
+		"/user/profile/update/", // put profile data (name, password etc.)    (not implemented)
+		"/user/wallet/balance/:child_id", // get user balance
+		"/user/wallet/log/:child_id", // get balance log
+		"/family/tasks/all", // get all family tasks
+		"/family/tasks/pending", // get all pending tasks
+		"/family/tasks/validate", // put confirm/reject to task(s)
+		"/family/tasks/add", // post create task
+		"/family/members/all", // get all users
+		"/family/members/add", // post create user
+		"/user/tasks/all", // get all todo tasks
+		"/user/expenses/add", // post add_expense
+		"/user/tasks/assign/add", // post create assign task(s)
+		"/user/tasks/complete", // put complete to assigned task(s)
+		"/user/login", // post login
+		"/user/register", // post register
+		"/user/logout", // post logout
+	],
+	"routes_plus_params": [
+
+		// GET
+		// if child use "/route" if parend "/route/child_id" example: (/all/19)
+
+		"/user/expenses/all/:child_id",
+		"/user/tasks/assign/all/:child_id",
+		"/user/wallet/balance/:child_id",
+		"/user/wallet/log/:child_id",
+
+		// POST/PUT
+		// send params if body as JSON 
+
+		"/family/tasks/validate": {
+			user_task_id: "string",
+			validate_status: "boolean",
+			reject_message: "string | null",
+		},
+		"/family/tasks/add": {
+			is_mono: "boolean",
+			reward: "number",
+			title: "string",
+			description: "string",
+			start_date: "Date",
+			end_date: "Date",
+		},
+		"/family/members/add": {
+			login: "string";
+			password: "string";
+			firstName: "string";
+			lastName: "string";
+			role: "number";
+		},
+		"/user/expenses/add": {
+			title: "string",
+			category: "string",
+			amount: "number",
+		},
+		"/user/tasks/assign/add": {
+			task_id: "string"
+		},
+		"/user/tasks/complete": {
+			completed_task_id: "string"
+		},
+		"/user/login": {
+			family_id: "string",
+			login: "string",
+			password: "string",
+		},
+		"/user/register": {
+			email: "string",
+			login: "string",
+			password: "string",
+			firstName: "string",
+			lastName: "string",
+		},
+	]
+}
